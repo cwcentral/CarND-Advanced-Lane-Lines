@@ -1,21 +1,20 @@
-## Writeup Template
-
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
----
-
 **Advanced Lane Finding Project**
 
 The goals / steps of this project are the following:
 
-* Compute the camera calibration matrix and distortion coefficients given a set of chessboard images.
-* Apply a distortion correction to raw images.
-* Use color transforms, gradients, etc., to create a thresholded binary image.
-* Apply a perspective transform to rectify binary image ("birds-eye view").
-* Detect lane pixels and fit to find the lane boundary.
-* Determine the curvature of the lane and vehicle position with respect to center.
-* Warp the detected lane boundaries back onto the original image.
-* Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
+Using common computer vision techniques, this project is to develop a pipeline that processes input video and determines
+where the lane lines are located and the current road lane for the vehicle's current position. In order to calculate the area of the lane that the vehicle is centered on, we need to indirectly calculate the location of the vehicle relative to the lane center and the radius of curvature of the lane.
+
+The pipeline is as follows:
+
+a. Compute the camera calibration matrix and distortion coefficients (intrinsics) given a set of chessboard images.
+b. Apply a distortion correction to binary images.
+c. Use color transforms, gradients, etc., to create a thresholded binary image.
+d. Apply a perspective transform to rectify binary image ("birds-eye view").
+e. Detect lane pixels and fit to find the lane boundary.
+f. Determine the curvature of the lane and vehicle position with respect to center.
+g. Warp the detected lane boundaries back onto the original image.
+h. Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
 [//]: # (Image References)
 
