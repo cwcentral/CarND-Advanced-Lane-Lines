@@ -7,14 +7,14 @@ where the lane lines are located and the current road lane for the vehicle's cur
 
 The pipeline is as follows:
 
-a. Compute the camera calibration matrix and distortion coefficients (intrinsics) given a set of chessboard images.
-b. Apply a distortion correction to binary images.
-c. Use color transforms, gradients, etc., to create a thresholded binary image.
-d. Apply a perspective transform to rectify binary image ("birds-eye view").
-e. Detect lane pixels and fit to find the lane boundary.
-f. Determine the curvature of the lane and vehicle position with respect to center.
-g. Warp the detected lane boundaries back onto the original image.
-h. Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
+1. Compute the camera calibration matrix and distortion coefficients (intrinsics) given a set of chessboard images.
+2. Apply a distortion correction to binary images.
+3. Use color transforms, gradients, etc., to create a thresholded binary image.
+4. Apply a perspective transform to rectify binary image ("birds-eye view").
+5. Detect lane pixels and fit to find the lane boundary.
+6. Determine the curvature of the lane and vehicle position with respect to center.
+7. Warp the detected lane boundaries back onto the original image.
+8. Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
 [//]: # (Image References)
 
