@@ -1,21 +1,20 @@
-## Writeup Template
-
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
----
-
 **Advanced Lane Finding Project**
 
 The goals / steps of this project are the following:
 
-* Compute the camera calibration matrix and distortion coefficients given a set of chessboard images.
-* Apply a distortion correction to raw images.
-* Use color transforms, gradients, etc., to create a thresholded binary image.
-* Apply a perspective transform to rectify binary image ("birds-eye view").
-* Detect lane pixels and fit to find the lane boundary.
-* Determine the curvature of the lane and vehicle position with respect to center.
-* Warp the detected lane boundaries back onto the original image.
-* Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
+Using common computer vision techniques, this project is to develop a pipeline that processes input video and determines
+where the lane lines are located and the current road lane for the vehicle's current position. In order to calculate the area of the lane that the vehicle is centered on, we need to indirectly calculate the location of the vehicle relative to the lane center and the radius of curvature of the lane.
+
+The pipeline is as follows:
+
+1. Compute the camera calibration matrix and distortion coefficients (intrinsics) given a set of chessboard images.
+2. Apply a distortion correction to binary images.
+3. Use color transforms, gradients, etc., to create a thresholded binary image.
+4. Apply a perspective transform to rectify binary image ("birds-eye view").
+5. Detect lane pixels and fit to find the lane boundary.
+6. Determine the curvature of the lane and vehicle position with respect to center.
+7. Warp the detected lane boundaries back onto the original image.
+8. Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
 [//]: # (Image References)
 
@@ -27,101 +26,118 @@ The goals / steps of this project are the following:
 [image6]: ./examples/example_output.jpg "Output"
 [video1]: ./project_video.mp4 "Video"
 
-## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 
-### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
+### Pipeline (video frames aka single images)
 
----
+1. Compute the camera calibration matrix and distortion coefficients (intrinsics) given a set of chessboard images.
 
-### Writeup / README
+This step we start the pipeline by calibration of the camera to correct for lens distortion. This provides us a proper flat projection for our 2D computer vision tasks, aka the pixel to distance (meters) values are linear across the image.
 
-#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
+We perform this with the standard chessboard technique, using an image of a chessboard with known spacing and size, finding the corners of the chessboard from different angles to develop the camera parameters allowing us to convert 2D distorted sensor measurements to an image that properly represents the 3D world. More on camera calibration can be found [here](https://en.wikipedia.org/wiki/Chessboard_detection)
 
-You're reading it!
+OpenCV has conveience method(s) to perform calibration, 'cv2.findChessboardCorners()'. We can also confirm the results by drawing the corners via cv2.drawChessboardCorners(). We take all the calibration images supplied and run findChessboardCorners on all of them to find their repective corners, then apply that vector of values to the opencv command: calibrateCamera() and develop a distortion matrix. For example on one image:
 
-### Camera Calibration
+![](camera_cal/calibration3.jpg?raw=true)
 
-#### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
+*Original Image*
 
-The code for this step is contained in the first code cell of the IPython notebook located in "./examples/example.ipynb" (or in lines # through # of the file called `some_file.py`).  
+![](markdown/draw_chessboard.png?raw=true)
 
-I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
+*Found Chess Corners and Drawn Lines*
 
-I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
+We take the derived distortion matrix and apply it to a video frame using the cv2.undistort() command:
+![](test_images/test2.jpg?raw=true)
 
-![alt text][image1]
+*Distorted Image*
 
-### Pipeline (single images)
+![](markdown/undistort-2.png?raw=true)
 
-#### 1. Provide an example of a distortion-corrected image.
+*UNdistorted Image*
 
-To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
-![alt text][image2]
+At the end of this step, in processing a video stream, I would have one UNdistorted video frame.
 
-#### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
+2. Apply a distortion correction to binary images.
 
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+Now one need to apply the undistorted image and create a binary image to reduce processing error and speed up processing in finding lane lines. Here, we take the undistored image and apply our to_binary() function, which converts the image to HLS colorspace, runs a sobel filter against it (canny edge detection), apply a gradient function that rejects edges that aren't part of a line, and apply a color threshold to create a binary-color image.
+![](markdown/step2_orig.png?raw=true)
 
-![alt text][image3]
+*Undistorted Image*
 
-#### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
+![](markdown/step2_bin.png?raw=true)
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+*Combined Binary Image*
 
-```python
-src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
-dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
-```
+At the end of this step, in processing a video stream, I would have one corrected, binary video frame.
 
-This resulted in the following source and destination points:
+4. Apply a perspective transform to rectify binary image ("birds-eye view").
 
-| Source        | Destination   | 
-|:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
+Having a bird-eye view, aka looking down, turns the 3D world representation of the image to a 2D perspective, which is much easier to detect lines (lines are 2D!). We assume the road is fairly flat and level plane, so having a looking-down view should have the lane lines appear parallel (easy to detect!). We apply a perspective transform on the image to create a bird-eye view of the image--in order words, designating a trapazoid in the image that contains the lines and warping it to its inverse as we were rotating the image.
 
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
+![](markdown/warp-1.png?raw=true)
 
-![alt text][image4]
+*Original Image*
 
-#### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
+![](markdown/warp-2.png?raw=true)
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+*Bird's Eye View, Warped Image*
 
-![alt text][image5]
+At the end of this step, in processing a video stream, I would have one bird's eye view (warped) video frame.
 
-#### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
+5. Detect lane pixels and fit to find the lane boundary.
 
-I did this in lines # through # in my code in `my_other_file.py`
+In a bird's eye view image, we can run a histrogram against the binary image and the higher counts indicate where the lines are located (as a cluster of points).
 
-#### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
+![](markdown/warp-3.png?raw=true)
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
+*Bird's Eye View, histrogram detecting where the connected lines are*
 
-![alt text][image6]
+We can use the histrogram to detect the lane positions in the image (across the X direction or perpendicular to the travel direction). We use all the points around the peaks of the image histogram (using max() and nonzero() functions). After finding the lane lines, we use them to fit a continuous line (polyfit()), that will be used to determine our lane boundary.
 
----
+![](markdown/fit-1.png?raw=true)
+
+*Lane line detected and line fitted on warped color image*
+
+At the end of this step, in processing a video stream, I would have 
+* lane lines detected and 
+* a virtual continuous line displayed over the lane lines in one bird's eye view (warped) video frame.
+
+6. Determine the curvature of the lane and vehicle position with respect to center and 
+7. Warp the detected lane boundaries back onto the original image and 
+8. Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
+
+Taking the warped image with continuous lines drawn on it denoting the lanes, we need to determine a search window for the lanes to idenitfy the boundaries. Basically, the fitted/continuous line is where we 'think' the actual lane is located in the image. Thus, we need to search the pixels around these lines for the true lane locations. We find the pixel positions of the true lane lines, and run polyfit() to help determine the actual lane boundary. The actual lane positions imply the lane boundary. We can fit a polygon to that boundary.
+
+![](markdown/fit-2.png?raw=true)
+
+*Lines estimating where the actual lane boundary is located via histogram analysis, search area to identify lane-line pixels in the image and resulting un-warped image showing the lane boundary.*
+
+We now have a polygon that identifies the lane in bird's eye view. We need to convert it back to the un-warped view. To unwarp the polygon, we need to find its location with respect to the center of the vehicle (view point) as well as the radius of curvature of the boundaries in bird's eye view. We convert the pixels to meters using [US road standards](http://onlinemanuals.txdot.gov/txdotmanuals/rdw/horizontal_alignment.htm#BGBHGEGC) and fitting the [curves to a circle](https://www.intmath.com/applications-differentiation/8-radius-curvature.php) in determining the curvature of the road.
+
+![](markdown/fill-1.png?raw=true)
+
+*Fitted lane boundary and calculated centerline offset of the vehicle and curvature of the lane*
+
+At the end of this step, in processing a video stream, I would have a polygon denoting the lane the vehicle is located in a unwarped color frame.
 
 ### Pipeline (video)
 
-#### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
+We take the above pipeline and run a video against it by passing individual frames. We attempt to run the sliding window approach as in Lesson 33, to speed up the lane-line detecting process. The processed videos are shown here:
 
-Here's a [link to my video result](./project_video.mp4)
-
----
+![]output.mp4
+![]output_challenge.mp4
+![]output_harder_challenge.mp4
 
 ### Discussion
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+* Road surface/Lane-line color: asphalt and concrete create situations that the binary conversion cannot handle robustly. In the harder challenge videos, it was very easy to go off road during bridge overpasses (which are concrete vs ashpalt). Faded, red lines, reflectors in the road may cause this pipeline to fail.
+* Lighting: Could effect detection of white and yellow lines, either by creating false positives or no detection of lines at all. Shadows caused lines to not be detected.
+* Environment & weather: We are totally rely on a camera-vision system, and optical occusions would cause this to fail.
+* Elevation chanegs: Since we are making a assumption that the road is fairly flat after warping, this maybe incorrect if the road itself has dips and rises within a single frame.
+* Changing lanes, It's very possible this pipeline could mis-interpret left or right lanes by reversing them as you change lanes.
+
+To make this pipeline more robust:
+* Apply the deep learning approach used in Project 3 to determine lane center and compare the center of the vehicle from this pipeline. Also compare steering angle from Project 3 with radius of curvature of this pipeline.
+* Possible augment data by creating left and right views of the video frames to provide other possible outcomes of this pipeline to compare against.
+* In addition to using Canny edge detection, ground plane detection via plane estimation and color segmentation from a monocular camera maybe used to perform background subtraction (reduce false positives).
