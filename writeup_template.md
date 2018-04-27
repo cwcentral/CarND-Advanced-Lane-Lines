@@ -138,6 +138,7 @@ We take the above pipeline and run a video against it by passing individual fram
 * Changing lanes, It's very possible this pipeline could mis-interpret left or right lanes by reversing them as you change lanes.
 
 To make this pipeline more robust:
+* Removal of road noise greatly improved the line detection. We applied the erosion-dilution technique to remove unwanted false positive due to shadows.
 * Apply the deep learning approach used in Project 3 to determine lane center and compare the center of the vehicle from this pipeline. Also compare steering angle from Project 3 with radius of curvature of this pipeline.
 * Possible augment data by creating left and right views of the video frames to provide other possible outcomes of this pipeline to compare against.
 * In addition to using Canny edge detection, ground plane detection via plane estimation and color segmentation from a monocular camera maybe used to perform background subtraction (reduce false positives).
