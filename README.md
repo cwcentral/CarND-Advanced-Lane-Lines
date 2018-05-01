@@ -108,7 +108,7 @@ At the end of this step, in processing a video stream, I would have a polygon de
 We take the above pipeline and run a video against it by passing individual frames. We attempt to run the sliding window approach as in Lesson 33, to speed up the lane-line detecting process. This is by looking at the "lane start position" (in the histogram) and seeing if the next frame's histogram result puts the lane start position in a similar range.
 
 (*Click to play video*)
-[![Output](ScreenshotOutput.mp4.png)](https://www.youtube.com/watch?v=a5Qq6c3vQy4 "Click to Play Video")
+[![Output](ScreenshotOutput.mp4.png)](https://youtu.be/zL4I8WUyqgA "Click to Play Video")
 
 ### Discussion
 
