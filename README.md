@@ -1,6 +1,6 @@
 # **Advanced Lane Finding Project**
 
-## The goals / steps of this project are the following:
+### The goals / steps of this project are the following:
 
 Using common computer vision techniques, this project is to develop a pipeline that processes input video and determies
 where lane lines are located and the current road lane for the vehicle's current position. In order to calculate the area of the lane that the vehicle is centered on, we need to indirectly calculate the location of the vehicle relative to the lane center and the radius of curvature of the lane.
@@ -29,7 +29,7 @@ The pipeline is as follows:
 
 ### Pipeline (video frames aka single images)
 
-####(1) Compute the camera calibration matrix and distortion coefficients (intrinsics) given a set of chessboard images.
+#### (1) Compute the camera calibration matrix and distortion coefficients (intrinsics) given a set of chessboard images.
 
 This step we start the pipeline by calibration of the camera to correct for lens distortion. This provides us a proper flat projection for our 2D computer vision tasks, aka the pixel to distance (meters) values are linear across the image.
 
@@ -49,7 +49,7 @@ We take the derived distortion matrix and apply it to a video frame using the cv
 
 At the end of this step, in processing a video stream, I would have one **un**distorted video frame.
 
-####(2) Apply a distortion correction to binary images and (3) Use color transforms, gradients, etc., to create a thresholded binary image.
+#### (2) Apply a distortion correction to binary images and (3) Use color transforms, gradients, etc., to create a thresholded binary image.
 
 Now we use the undistorted image and create a binary image to reduce processing error and speed up processing in finding lane lines. Here, we take the undistored image and apply our to_binary_sobel() function, which converts the image to HLS colorspace, runs a sobel filter against it (canny edge detection), applies a gradient function that rejects edges that aren't part of a line, and applies a color threshold on white and yellow lines to create a binary-color image. 
 
@@ -59,7 +59,7 @@ Now we use the undistorted image and create a binary image to reduce processing 
 
 At the end of this step, in processing a video stream, I would have one corrected, binary video frame. A vlack-n-white image containing the S channel from the HLS image, 'yellow' channel and white channel from the RGB image and the gradient pixels from applying a sobel filter.
 
-####(4) Apply a perspective transform to rectify binary image ("birds-eye view").
+#### (4) Apply a perspective transform to rectify binary image ("birds-eye view").
 
 Having a bird-eye view, aka looking down, turns the 3D world representation of the image to a flat 2D perspective, which is much easier to detect lines (lines are 2D!). We assume the road is fairly flat and level plane, so having a looking-down view should have the lane lines appear parallel (easy to detect!). We apply a perspective transform on the image to create a bird-eye view of the image--in order words, designating a trapazoid in the image that contains the lines and warping it.
 
@@ -69,7 +69,7 @@ Having a bird-eye view, aka looking down, turns the 3D world representation of t
 
 At the end of this step, in processing a video stream, I would have one bird's eye view (warped) video frame.
 
-####(5) Detect lane pixels and fit to find the lane boundary.
+#### (5) Detect lane pixels and fit to find the lane boundary.
 
 In a bird's eye view image, we can run a histrogram against the binary image and the higher counts indicate where the lines are located (as a cluster of points aka peaks).
 
@@ -87,7 +87,7 @@ At the end of this step, in processing a video stream, I would have
 * lane lines detected and 
 * a virtual continuous line displayed over the lane lines in one bird's eye view (warped) video frame.
 
-####(6) Determine the curvature of the lane and vehicle position with respect to center and (7) Warp the detected lane boundaries back onto the original image and (8) Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
+#### (6) Determine the curvature of the lane and vehicle position with respect to center and (7) Warp the detected lane boundaries back onto the original image and (8) Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
 Taking the warped image with continuous lines drawn on it denoting the lanes, we need to find the actual lanes. Basically, the fitted/continuous line is where we 'think' the actual lane is located in the image. Thus, we need to search the pixels around these lines for the true lane locations (a cluster of points in the binary image). We find the pixel positions of the true lane lines, and run polyfit() to help determine the actual lane boundary. The actual lane positions imply a lane boundary: we can fit a polygon to that boundary.
 
