@@ -109,7 +109,7 @@ At the end of this step, in processing a video stream, I would have a polygon de
 
 We take the above pipeline and run a video against it by passing individual frames. We attempt to run the sliding window approach as in Lesson 33, to speed up the lane-line detecting process. The processed videos are shown here:
 
-[![Click to Play](ScreenshotOutput.mp4.png)](https://www.youtube.com/watch?v=a5Qq6c3vQy4 "Click to Play Video")
+[![Output](ScreenshotOutput.mp4.png)](https://www.youtube.com/watch?v=a5Qq6c3vQy4 "Click to Play Video")
 
 ### Discussion
 
