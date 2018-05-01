@@ -116,7 +116,7 @@ We take the above pipeline and run a video against it by passing individual fram
 
 * Road surface/Lane-line color: asphalt and concrete create situations that the binary conversion cannot handle robustly. If you can't see yellow or white (shadows), well you can't see the lane lines...
 
-[](markdown/problem.png?raw=true)
+<img src="markdown/problem.png" alt="alt text" width="150%" height="150%">
 
 
 * Scene lighting: Could effect detection of white and yellow lines, either by creating false positives or no detection of lines at all. Shadows caused lines to not be detected. For example, this would not work at night.
